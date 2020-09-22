@@ -1,6 +1,8 @@
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ui.Renderer;
 import ui.ResourceLoader;
+import ui.SpriteSheet;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,9 +17,11 @@ public class Game extends Canvas implements Runnable {
     private static final int TARGET_FPS = 70;
     private static final double CONVERSION_FACTOR = Math.pow(10, 9) / TARGET_FPS;
 
-
+    @Nullable private static final BufferedImage GRASS = ResourceLoader.loadImage("/img/Grass.png");
+    @NotNull private final SpriteSheet spriteSheet;
 
     @NotNull private final Renderer renderer;
+
 
     public Game() {
         final JFrame gameFrame = new JFrame(Game.TITLE);
@@ -25,7 +29,14 @@ public class Game extends Canvas implements Runnable {
 
         createBufferStrategy(3);
 
-        renderer = new Renderer(gameFrame);
+        this.renderer = new Renderer(gameFrame);
+
+        final BufferedImage spriteImage = ResourceLoader.loadImage("/img/spritesheet.png");
+        if (spriteImage == null) {
+            throw new RuntimeException("Provided sprite sheet was null. Could not initialize game.");
+        }
+        this.spriteSheet = new SpriteSheet(spriteImage, 16, 16);
+        this.spriteSheet.init();
     }
 
     private void prepareFrame(@NotNull final JFrame gameFrame) {
@@ -62,12 +73,8 @@ public class Game extends Canvas implements Runnable {
     private void feedRenderer(@NotNull final BufferStrategy bufferStrategy) {
         final Graphics drawGraphics = bufferStrategy.getDrawGraphics();
 
-        final BufferedImage image = ResourceLoader.loadImage("/img/Grass.png");
-        if (image != null) {
-            getRenderer().renderImage(image, 0, 0, 50, 50);
-        }
-
-        getRenderer().renderFullView(drawGraphics);
+        getRenderer().renderSprite(spriteSheet.getSprite(3, 4), 50, 50, 5, 5);
+        getRenderer().drawToScreen(drawGraphics);
 
         drawGraphics.dispose();
         bufferStrategy.show();

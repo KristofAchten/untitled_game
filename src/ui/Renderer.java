@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
 public class Renderer {
+    private static final int ALPHA = 0xFFFF00DC;
 
     @NotNull private final BufferedImage view;
     @NotNull private final Camera camera;
@@ -19,23 +20,24 @@ public class Renderer {
         this.pixels = bufferedImageToPixels(view);
     }
 
-    public void renderFullView(@NotNull final Graphics drawGraphics) {
+    public void drawToScreen(@NotNull final Graphics drawGraphics) {
         drawGraphics.drawImage(view, 0, 0, getWidth(), getHeight(), null);
     }
 
-    public void renderImage(@NotNull final BufferedImage image,
-                            final int xPos,
-                            final int yPos,
-                            final int widthScale,
+    public void renderImage(@NotNull final BufferedImage image, final int xPos, final int yPos, final int widthScale,
                             final int heightScale) {
-        final int[] imagePixels = bufferedImageToPixels(image);
-        for (int y = 0; y < image.getHeight() * widthScale; y++) {
-            for (int x = 0; x < image.getWidth() * heightScale; x++) {
-                safeSetPixel(
-                        imagePixels[(x/heightScale) + (y/widthScale) * image.getWidth()],
-                        x + xPos,
-                        y + yPos
-                );
+        renderPixelArray(bufferedImageToPixels(image), xPos, yPos, image.getWidth(), image.getHeight(), widthScale, heightScale);
+    }
+
+    public void renderSprite(@NotNull final Sprite sprite, final int xPos, final int yPos, final int widthScale,
+                             final int heightScale) {
+        renderPixelArray(sprite.getPixels(), xPos, yPos, sprite.getWidth(), sprite.getHeight(), widthScale, heightScale);
+    }
+    public void renderPixelArray(@NotNull final int[] pixels, final int xPos, final int yPos, final int width,
+                                 final int height, final int widthScale, final int heightScale) {
+        for (int y = 0; y < height * widthScale; y++) {
+            for (int x = 0; x < width * heightScale; x++) {
+                safeSetPixel(pixels[(x / heightScale) + (y / widthScale) * width], x + xPos, y + yPos);
             }
         }
     }
@@ -44,8 +46,8 @@ public class Renderer {
                               final int xPos,
                               final int yPos) {
         final Camera camera = getCamera();
-        if (camera.coordinatesInside(xPos, yPos)) {
-            pixels[(xPos - camera.getxPos())  + (yPos - camera.getyPos()) * getWidth()] = pixel;
+        if (camera.coordinatesInside(xPos, yPos) && pixel != Renderer.ALPHA) {
+            pixels[(xPos - camera.getxPos()) + (yPos - camera.getyPos()) * getWidth()] = pixel;
         }
     }
 
