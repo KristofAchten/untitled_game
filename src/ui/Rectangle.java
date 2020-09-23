@@ -43,8 +43,8 @@ public class Rectangle {
     public boolean coordinatesInside(final int xCoordinate,
                                      final int yCoordinate) {
         return xCoordinate >= getxPos()
-                && xCoordinate <= getxPos() + getWidth()
+                && xCoordinate < getxPos() + getWidth()
                 && yCoordinate >= getyPos()
-                && yCoordinate <= getyPos() + getHeight();
+                && yCoordinate < getyPos() + getHeight();
     }
 }

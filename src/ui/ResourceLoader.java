@@ -33,4 +33,9 @@ public class ResourceLoader {
 
         return formattedImage;
     }
+
+    @NotNull
+    public static String fixPath(@NotNull final String path) {
+        return "resources" + path;
+    }
 }

@@ -1,8 +1,9 @@
 package ui;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +18,25 @@ public class SpriteSheet {
 
     @NotNull private final List<Sprite> sprites = new ArrayList<>();
 
-    public SpriteSheet(@NotNull final BufferedImage image,
-                       final int spriteWidth,
-                       final int spriteHeight) {
-        this.image = image;
+    public SpriteSheet(@NotNull final String spritesheetPath,
+                       @NotNull final Dimension spriteDimension) {
+
+        this.image = ResourceLoader.loadImage(spritesheetPath);
+        if (image == null) {
+            throw new IllegalStateException("Could not load Spritesheet at path " + spritesheetPath);
+        }
+
         this.width = image.getWidth();
         this.height = image.getHeight();
-        this.spriteWidth = spriteWidth;
-        this.spriteHeight = spriteHeight;
         this.pixels = new int[getWidth() * getHeight()];
         image.getRGB(0, 0, getWidth(), getHeight(), getPixels(), 0, getWidth());
+
+        this.spriteWidth = (int) spriteDimension.getWidth();
+        this.spriteHeight = (int) spriteDimension.getHeight();
+
+        init();
     }
+
 
     public void init() {
         for (int y = 0; y < getHeight(); y += getSpriteHeight()) {
@@ -37,7 +46,8 @@ public class SpriteSheet {
         }
     }
 
-    private Sprite loadSprite(final int xPos, final int yPos) {
+    @Contract("_, _ -> new")
+    private @NotNull Sprite loadSprite(final int xPos, final int yPos) {
         final int[] spritePixels = new int[getSpriteWidth() * getSpriteHeight()];
         getImage().getRGB(xPos, yPos, getSpriteWidth(), getSpriteHeight(), spritePixels, 0, getSpriteWidth());
 
