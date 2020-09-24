@@ -66,8 +66,8 @@ public class GameMap {
 
         // Filling the background = filling the view visible through the camera.
         if (getBackgroundTile() != null) {
-            for (int y = camera.getyPos(); y < camera.getyPos() + camera.getHeight(); y += tileHeight) {
-                for (int x = camera.getxPos(); x < camera.getxPos() + camera.getWidth(); x += tileWidth) {
+            for (int y = camera.getyPos() - (camera.getyPos() % tileHeight) - tileHeight; y < camera.getyPos() + camera.getHeight(); y += tileHeight) {
+                for (int x = camera.getxPos() - (camera.getxPos() % tileWidth) - tileHeight; x < camera.getxPos() + camera.getWidth(); x += tileWidth) {
                     getRepository().renderTile(getBackgroundTile().getIdentifier(), renderer, x, y, xScale, yScale);
                 }
             }

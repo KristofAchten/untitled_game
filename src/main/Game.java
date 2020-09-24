@@ -1,12 +1,15 @@
+package main;
+
+import main.listeners.KeyboardInputHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import ui.*;
 import ui.Renderer;
+import ui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Game extends Canvas implements Runnable {
     @NotNull private static final String TITLE = "Untitled: the game";
@@ -14,23 +17,28 @@ public class Game extends Canvas implements Runnable {
     private static final int HEIGHT = 1000;
 
     private static final int TARGET_FPS = 70;
-    private static final double CONVERSION_FACTOR = Math.pow(10, 9) / TARGET_FPS;
-    
+    private static final double CONVERSION_FACTOR = Math.pow(10, 8) / TARGET_FPS;
+
     @NotNull private final GameMap map;
     @NotNull private final Renderer renderer;
-
+    @NotNull private final KeyboardInputHandler keyboardListener;
+    @NotNull private final List<Renderable> gameElements = new ArrayList<>();
 
     public Game() {
+        final SpriteSheet spriteSheet = new SpriteSheet("/img/defaultSpriteSheet.png", new Dimension(16, 16));
+        final TileRepository tileRepository = new TileRepository(ResourceLoader.fixPath("/tilesDef.def"), spriteSheet);
         final JFrame gameFrame = new JFrame(Game.TITLE);
-        prepareFrame(gameFrame);
 
+        prepareFrame(gameFrame);
         createBufferStrategy(3);
 
         this.renderer = new Renderer(gameFrame);
-
-        final SpriteSheet spriteSheet = new SpriteSheet("/img/defaultSpriteSheet.png", new Dimension(16, 16));
-        final TileRepository tileRepository = new TileRepository(ResourceLoader.fixPath("/tilesDef.def"), spriteSheet);
         this.map = new GameMap(ResourceLoader.fixPath("/defaultMap.map"), tileRepository);
+
+        gameElements.add(new Player());
+
+        keyboardListener = new KeyboardInputHandler();
+        addKeyListener(keyboardListener);
     }
 
     private void prepareFrame(@NotNull final JFrame gameFrame) {
@@ -55,7 +63,7 @@ public class Game extends Canvas implements Runnable {
             long curTime = System.nanoTime();
             elapsedTimeInSeconds = (curTime - prevTime) / CONVERSION_FACTOR;
             while (elapsedTimeInSeconds >= 1) {
-                runStep();
+                step();
                 elapsedTimeInSeconds--;
             }
 
@@ -67,16 +75,22 @@ public class Game extends Canvas implements Runnable {
     private void feedRenderer(@NotNull final BufferStrategy bufferStrategy) {
         final Graphics drawGraphics = bufferStrategy.getDrawGraphics();
 
-        map.render(getRenderer(), 5, 5);
+        map.render(getRenderer(), Config.DEFAULT_SCALE, Config.DEFAULT_SCALE);
+        for (Renderable renderable : gameElements) {
+            renderable.render(getRenderer(), Config.DEFAULT_SCALE, Config.DEFAULT_SCALE);
+        }
 
         getRenderer().drawToScreen(drawGraphics);
 
         drawGraphics.dispose();
         bufferStrategy.show();
-
+        getRenderer().clear();
     }
 
-    private void runStep() {
+    private void step() {
+        for (Renderable renderable : gameElements) {
+            renderable.step(this);
+        }
     }
 
     @NotNull
@@ -84,6 +98,10 @@ public class Game extends Canvas implements Runnable {
         return renderer;
     }
 
+    @NotNull
+    public KeyboardInputHandler getKeyboardListener() {
+        return keyboardListener;
+    }
 
     public static void main(String[] args) {
         new Thread(new Game()).start();

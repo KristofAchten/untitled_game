@@ -33,6 +33,16 @@ public class Renderer {
                              final int heightScale) {
         renderPixelArray(sprite.getPixels(), xPos, yPos, sprite.getWidth(), sprite.getHeight(), widthScale, heightScale);
     }
+
+
+    public void renderRectangle(@NotNull final Rectangle rectangle, final int xScale, final int yScale) {
+        final int[] rectPixels = new int[rectangle.getWidth() * rectangle.getHeight()];
+        for (int i = 0; i < rectPixels.length; i++) {
+            rectPixels[i] = 0x76EEC6;
+        }
+        renderPixelArray(rectPixels, rectangle.getxPos(), rectangle.getyPos(), rectangle.getWidth(), rectangle.getHeight(), xScale, yScale);
+    }
+
     public void renderPixelArray(@NotNull final int[] pixels, final int xPos, final int yPos, final int width,
                                  final int height, final int widthScale, final int heightScale) {
         for (int y = 0; y < height * widthScale; y++) {
@@ -67,4 +77,11 @@ public class Renderer {
     public Camera getCamera() {
         return camera;
     }
+
+    public void clear() {
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = 0;
+        }
+    }
 }
+
