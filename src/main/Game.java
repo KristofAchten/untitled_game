@@ -18,7 +18,6 @@ public class Game extends Canvas implements Runnable {
 
     private static final int TARGET_FPS = 70;
     private static final double CONVERSION_FACTOR = Math.pow(10, 8) / TARGET_FPS;
-
     @NotNull private final GameMap map;
     @NotNull private final Renderer renderer;
     @NotNull private final KeyboardInputHandler keyboardListener;
@@ -26,14 +25,14 @@ public class Game extends Canvas implements Runnable {
 
     public Game() {
         final SpriteSheet spriteSheet = new SpriteSheet("/img/defaultSpriteSheet.png", new Dimension(16, 16));
-        final TileRepository tileRepository = new TileRepository(ResourceLoader.fixPath("/tilesDef.def"), spriteSheet);
         final JFrame gameFrame = new JFrame(Game.TITLE);
 
         prepareFrame(gameFrame);
         createBufferStrategy(3);
 
         this.renderer = new Renderer(gameFrame);
-        this.map = new GameMap(ResourceLoader.fixPath("/defaultMap.map"), tileRepository);
+
+        this.map = MapGenerator.generate(spriteSheet);
 
         gameElements.add(new Player());
 
@@ -101,6 +100,11 @@ public class Game extends Canvas implements Runnable {
     @NotNull
     public KeyboardInputHandler getKeyboardListener() {
         return keyboardListener;
+    }
+
+    @NotNull
+    public GameMap getMap() {
+        return map;
     }
 
     public static void main(String[] args) {

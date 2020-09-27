@@ -2,13 +2,13 @@ package ui;
 
 import org.jetbrains.annotations.NotNull;
 
-public class Tile {
+public class TileDep {
 
     @NotNull private final String identifier;
     @NotNull private final Sprite sprite;
 
-    public Tile(@NotNull final String identifier,
-                @NotNull final Sprite sprite) {
+    public TileDep(@NotNull final String identifier,
+                   @NotNull final Sprite sprite) {
         this.identifier = identifier;
         this.sprite = sprite;
     }

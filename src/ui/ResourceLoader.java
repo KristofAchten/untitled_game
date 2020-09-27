@@ -36,6 +36,6 @@ public class ResourceLoader {
 
     @NotNull
     public static String fixPath(@NotNull final String path) {
-        return "resources" + path;
+        return "res" + path;
     }
 }

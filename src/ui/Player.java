@@ -2,22 +2,13 @@ package ui;
 
 import main.Config;
 import main.Game;
+import main.listeners.KeyboardInputHandler;
 import org.jetbrains.annotations.NotNull;
+import ui.tiles.Tile;
 
-import java.awt.event.KeyEvent;
-import java.util.List;
-import java.util.Map;
+import java.awt.*;
 
 public class Player extends Rectangle implements Renderable {
-
-    private static final int UP_KEY = Config.USE_AZERTY ? KeyEvent.VK_Z : KeyEvent.VK_W;
-    private static final int DOWN_KEY = KeyEvent.VK_S;
-    private static final int LEFT_KEY = Config.USE_AZERTY ? KeyEvent.VK_Q : KeyEvent.VK_A;
-    private static final int RIGHT_KEY = KeyEvent.VK_D;
-    private static final int UP_KEY_ALTERNATIVE = KeyEvent.VK_UP;
-    private static final int DOWN_KEY_ALTERNATIVE = KeyEvent.VK_DOWN;
-    private static final int LEFT_KEY_ALTERNATIVE = KeyEvent.VK_LEFT;
-    private static final int RIGHT_KEY_ALTERNATIVE = KeyEvent.VK_RIGHT;
 
     private static final int MOVEMENT_SPEED = 1;
 
@@ -32,42 +23,64 @@ public class Player extends Rectangle implements Renderable {
 
     @Override
     public void step(@NotNull final Game game) {
-        final Map<Integer, Boolean> pressedKeys = game.getKeyboardListener().getPressedKeys();
-
-        if (pressedKeys.getOrDefault(UP_KEY, false) || pressedKeys.getOrDefault(UP_KEY_ALTERNATIVE, false)) {
-            move(Direction.UP);
-        }
-        if (pressedKeys.getOrDefault(DOWN_KEY, false) || pressedKeys.getOrDefault(DOWN_KEY_ALTERNATIVE, false)) {
-            move(Direction.DOWN);
-        }
-        if (pressedKeys.getOrDefault(LEFT_KEY, false) || pressedKeys.getOrDefault(LEFT_KEY_ALTERNATIVE, false)) {
-            move(Direction.LEFT);
-        }
-        if (pressedKeys.getOrDefault(RIGHT_KEY, false) || pressedKeys.getOrDefault(RIGHT_KEY_ALTERNATIVE, false)) {
-            move(Direction.RIGHT);
-        }
+        move(game);
         updateCamera(game.getRenderer().getCamera());
     }
 
     private void updateCamera(@NotNull final Camera camera) {
-        camera.setXPos((getxPos() + (getWidth() * Config.DEFAULT_SCALE) / 2) - (camera.getWidth() / 2));
-        camera.setYPos((getyPos() + (getHeight() * Config.DEFAULT_SCALE) / 2) - (camera.getHeight() / 2));
+        camera.setXPos((getXPos() + (getWidth() * Config.DEFAULT_SCALE) / 2) - (camera.getWidth() / 2));
+        camera.setYPos((getYPos() + (getHeight() * Config.DEFAULT_SCALE) / 2) - (camera.getHeight() / 2));
     }
 
-    public void move(@NotNull final Direction dir) {
-        switch (dir) {
-            case LEFT:
-                setXPos(getxPos() - MOVEMENT_SPEED);
-                break;
-            case RIGHT:
-                setXPos(getxPos() + MOVEMENT_SPEED);
-                break;
-            case UP:
-                setYPos(getyPos() - MOVEMENT_SPEED);
-                break;
-            case DOWN:
-                setYPos(getyPos() + MOVEMENT_SPEED);
-                break;
+    public void move(@NotNull final Game game) {
+        if (!canMove(game)) {
+            return;
         }
+
+        if (KeyboardInputHandler.LEFT.isPressed()) {
+            setXPos(getXPos() - MOVEMENT_SPEED);
+        }
+        if (KeyboardInputHandler.RIGHT.isPressed()) {
+            setXPos(getXPos() + MOVEMENT_SPEED);
+        }
+        if (KeyboardInputHandler.UP.isPressed()) {
+            setYPos(getYPos() - MOVEMENT_SPEED);
+        }
+        if (KeyboardInputHandler.DOWN.isPressed()) {
+            setYPos(getYPos() + MOVEMENT_SPEED);
+        }
+    }
+
+    private boolean canMove(@NotNull final Game game) {
+        final Point currentTilePos = getTileAtCurrentPosition();
+
+        if (KeyboardInputHandler.LEFT.isPressed()) {
+            return canMoveInDirection(game, currentTilePos, 0, -1);
+        }
+        if (KeyboardInputHandler.RIGHT.isPressed()) {
+            return canMoveInDirection(game, currentTilePos, 0, 1);
+        }
+        if (KeyboardInputHandler.UP.isPressed()) {
+            return canMoveInDirection(game, currentTilePos, -1, 0);
+        }
+        if (KeyboardInputHandler.DOWN.isPressed()) {
+            return canMoveInDirection(game, currentTilePos, 1, 0);
+        }
+        return true;
+    }
+
+    private boolean canMoveInDirection(@NotNull final Game game, @NotNull final Point currentPos, final int xdiff, final int ydiff) {
+        return game.getMap()
+                .getMapTiles()
+                .get(new Point(currentPos.x + xdiff, currentPos.y + ydiff))
+                .stream().allMatch(Tile::canPass);
+    }
+
+    private Point getTileAtCurrentPosition() {
+        final int x = getXPos();
+        final int y  = getYPos();
+        final int scaleFactor = 16 * Config.DEFAULT_SCALE;
+
+        return new Point (x / scaleFactor, y / scaleFactor);
     }
 }

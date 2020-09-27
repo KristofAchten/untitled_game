@@ -36,11 +36,8 @@ public class Renderer {
 
 
     public void renderRectangle(@NotNull final Rectangle rectangle, final int xScale, final int yScale) {
-        final int[] rectPixels = new int[rectangle.getWidth() * rectangle.getHeight()];
-        for (int i = 0; i < rectPixels.length; i++) {
-            rectPixels[i] = 0x76EEC6;
-        }
-        renderPixelArray(rectPixels, rectangle.getxPos(), rectangle.getyPos(), rectangle.getWidth(), rectangle.getHeight(), xScale, yScale);
+
+        renderPixelArray(rectangle.getPixels(), rectangle.getXPos(), rectangle.getYPos(), rectangle.getWidth(), rectangle.getHeight(), xScale, yScale);
     }
 
     public void renderPixelArray(@NotNull final int[] pixels, final int xPos, final int yPos, final int width,
@@ -57,7 +54,7 @@ public class Renderer {
                               final int yPos) {
         final Camera camera = getCamera();
         if (camera.coordinatesInside(xPos, yPos) && pixel != Renderer.ALPHA) {
-            pixels[(xPos - camera.getxPos()) + (yPos - camera.getyPos()) * getWidth()] = pixel;
+            pixels[(xPos - camera.getXPos()) + (yPos - camera.getYPos()) * getWidth()] = pixel;
         }
     }
 

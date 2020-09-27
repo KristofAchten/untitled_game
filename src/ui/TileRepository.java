@@ -15,7 +15,7 @@ public class TileRepository {
     @NotNull private static final Logger LOGGER = Logger.getLogger(TileRepository.class.getName());
     @NotNull private static final String DELIMITER = ",";
     @NotNull private static final String COMMENT_SYNTAX = "--";
-    @NotNull private final Map<String, Tile> tilesMap = new HashMap<>();
+    @NotNull private final Map<String, TileDep> tilesMap = new HashMap<>();
     @NotNull private final SpriteSheet spriteSheet;
 
     public TileRepository(@NotNull final String tileDefinitionPath,
@@ -35,7 +35,7 @@ public class TileRepository {
 
         while (fileScanner.hasNextLine()) {
             final String line = fileScanner.nextLine();
-            if (line.startsWith(COMMENT_SYNTAX)) {
+            if (line.startsWith(COMMENT_SYNTAX) || line.trim().isEmpty()) {
                 continue;
             }
 
@@ -48,7 +48,7 @@ public class TileRepository {
             final int spritePosX = Integer.parseInt(parts[1]);
             final int spritePosY = Integer.parseInt(parts[2]);
 
-            getTilesMap().put(identifier, new Tile(identifier, getSpriteSheet().getSprite(spritePosX, spritePosY)));
+            getTilesMap().put(identifier, new TileDep(identifier, getSpriteSheet().getSprite(spritePosX, spritePosY)));
         }
     }
 
@@ -58,12 +58,12 @@ public class TileRepository {
     }
 
     @Nullable
-    public Tile getTile(@NotNull final String id) {
+    public TileDep getTile(@NotNull final String id) {
         return getTilesMap().get(id);
     }
 
     @NotNull
-    public Map<String, Tile> getTilesMap() {
+    public Map<String, TileDep> getTilesMap() {
         return tilesMap;
     }
 
